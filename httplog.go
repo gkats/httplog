@@ -45,8 +45,8 @@ func (l *httpLogger) buildLogEntry() []byte {
 	buf = append(buf, " method="+l.method...)
 	buf = append(buf, " path="+l.path...)
 	buf = append(buf, " ua="+l.ua...)
-	buf = append(buf, " params="+l.params...)
 	buf = append(buf, " status="+strconv.Itoa(l.status)...)
+	buf = append(buf, " params="+l.params...)
 	return buf
 }
 
