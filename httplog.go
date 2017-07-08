@@ -2,6 +2,7 @@ package httplog
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -16,6 +17,7 @@ type Logger interface {
 	Log()
 	SetStatus(int)
 	SetRequestInfo(*http.Request)
+	Add(string, interface{})
 }
 
 type httpLogger struct {
@@ -27,10 +29,14 @@ type httpLogger struct {
 	params string
 	status int
 	reqRaw []byte
+	extras map[string]interface{}
 }
 
 func New(w io.Writer) Logger {
-	return &httpLogger{w: w}
+	return &httpLogger{
+		w:      w,
+		extras: make(map[string]interface{}, 0),
+	}
 }
 
 func (l *httpLogger) Log() {
@@ -47,7 +53,14 @@ func (l *httpLogger) buildLogEntry() []byte {
 	buf = append(buf, " ua="+l.ua...)
 	buf = append(buf, " status="+strconv.Itoa(l.status)...)
 	buf = append(buf, " params="+l.params...)
+	for k, v := range l.extras {
+		buf = append(buf, " "+k+"="+fmt.Sprintf("%v", v)...)
+	}
 	return buf
+}
+
+func (l *httpLogger) Add(key string, value interface{}) {
+	l.extras[key] = value
 }
 
 func (l *httpLogger) SetStatus(s int) {

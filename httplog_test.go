@@ -119,3 +119,33 @@ func TestSetRequestInfo(t *testing.T) {
 		}
 	}
 }
+
+func TestLogExtras(t *testing.T) {
+	w := NewTestWriter()
+	l := httplog.New(w)
+	l.Add("uid", 1234)
+	l.Add("secret", "shhh!")
+	l.Log()
+
+	tests := []string{
+		"level=I",
+		"time=",
+		"ip=",
+		"method=",
+		"path=",
+		"ua=",
+		"status=",
+		"params=",
+		"uid=1234",
+		"secret=shhh!",
+		"\n",
+	}
+	count := 0
+	for i, want := range tests {
+		count = strings.Count(w.Stream, want)
+		if count != 1 {
+			t.Errorf("(%v) Expected %v to contain '%v' exactly once, got %v", i, w.Stream, want, count)
+		}
+		count = 0
+	}
+}
